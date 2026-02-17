@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 	"os/user"
+	"runtime"
 )
 
 func main() {
@@ -14,13 +15,16 @@ func main() {
 	}
 
 	fmt.Println("Current User Home Directory:", userDir.HomeDir)
-	cmd := exec.Command("cmd", "ls", "-la")
+
+	var cmd *exec.Cmd
+
+	if runtime.GOOS == "windows" {
+		cmd = exec.Command("cmd", "/C", "dir")
+	} else {
+		cmd = exec.Command("sh", "-c", "ls -la")
+	}
 	cmd.Dir = userDir.HomeDir
 	output, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
