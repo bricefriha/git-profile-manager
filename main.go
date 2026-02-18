@@ -29,6 +29,7 @@ func main() {
 
 		if !fileExists(targetFilePath) {
 			fmt.Fprintln(os.Stderr, "No git config available in this environment")
+			return
 		}
 		if !fileExists(fileSource) {
 			fmt.Fprintf(os.Stderr, "%s not found", sourcePath)
