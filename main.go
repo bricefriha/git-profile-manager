@@ -25,8 +25,13 @@ func main() {
 	if args[0] == "switchto" {
 		fileSource := fmt.Sprintf(".gitconfig-%s", args[1])
 		sourcePath := filepath.Join(gitConfDir, fileSource)
+		targetFilePath := filepath.Join(gitConfDir, ".gitconfig")
+
+		if !fileExists(targetFilePath) {
+			fmt.Fprintln(os.Stderr, "No git config available in this environment")
+		}
 		if !fileExists(fileSource) {
-			fmt.Printf("%s not found", sourcePath)
+			fmt.Fprintf(os.Stderr, "%s not found", sourcePath)
 			fmt.Println()
 		}
 	}
