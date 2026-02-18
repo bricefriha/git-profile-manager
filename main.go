@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"os/exec"
+	"os"
 	"os/user"
+	"path/filepath"
 	"runtime"
 )
 
@@ -13,26 +14,40 @@ func main() {
 		fmt.Println("Error:", err)
 		return
 	}
-	os := runtime.GOOS
-	fmt.Println("Detected os:", os)
+	osDis := runtime.GOOS
+	fmt.Println("Detected os:", osDis)
 
 	fmt.Println("Current User Home Directory:", userDir.HomeDir)
 
-	var cmd *exec.Cmd
-	var gitConfDir string
+	args := os.Args[1:]
+	gitConfDir := userDir.HomeDir
 
-	if os == "windows" {
-		gitConfDir = userDir.HomeDir
-		cmd = exec.Command("cmd", "/C", "dir")
-	} else {
-		gitConfDir = userDir.HomeDir
-		cmd = exec.Command("sh", "-c", "ls -la")
+	if args[0] == "switchto" {
+		fileSource := fmt.Sprintf(".gitconfig-%s", args[1])
+		sourcePath := filepath.Join(gitConfDir, fileSource)
+		if !fileExists(fileSource) {
+			fmt.Printf("%s not found", sourcePath)
+			fmt.Println()
+		}
 	}
-	cmd.Dir = gitConfDir
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-	fmt.Println(string(output))
+	// var cmd *exec.Cmd
+
+	// if osDis == "windows" {
+	// 	cmd = exec.Command("cmd", "/C", "dir")
+	// } else {
+	// 	gitConfDir = userDir.HomeDir
+	// 	cmd = exec.Command("sh", "-c", "ls -la")
+	// }
+	// cmd.Dir = gitConfDir
+	// output, err := cmd.CombinedOutput()
+	// if err != nil {
+	// 	fmt.Println("Error:", err)
+	// 	return
+	// }
+	// fmt.Println(string(output))
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }
