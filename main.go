@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -23,7 +24,8 @@ func main() {
 	gitConfDir := userDir.HomeDir
 
 	if args[0] == "switchto" {
-		fileSource := fmt.Sprintf(".gitconfig-%s", args[1])
+		profileName := args[1]
+		fileSource := fmt.Sprintf(".gitconfig-%s", profileName)
 		sourcePath := filepath.Join(gitConfDir, fileSource)
 		targetFilePath := filepath.Join(gitConfDir, ".gitconfig")
 
@@ -31,26 +33,30 @@ func main() {
 			fmt.Fprintln(os.Stderr, "No git config available in this environment")
 			return
 		}
-		if !fileExists(fileSource) {
+		if !fileExists(sourcePath) {
 			fmt.Fprintf(os.Stderr, "%s not found", sourcePath)
 			fmt.Println()
+			return
 		}
-	}
-	// var cmd *exec.Cmd
 
-	// if osDis == "windows" {
-	// 	cmd = exec.Command("cmd", "/C", "dir")
-	// } else {
-	// 	gitConfDir = userDir.HomeDir
-	// 	cmd = exec.Command("sh", "-c", "ls -la")
-	// }
-	// cmd.Dir = gitConfDir
-	// output, err := cmd.CombinedOutput()
-	// if err != nil {
-	// 	fmt.Println("Error:", err)
-	// 	return
-	// }
-	// fmt.Println(string(output))
+		in, err := os.Open(sourcePath)
+		if err != nil {
+			panic(err)
+		}
+
+		out, err := os.Create(targetFilePath)
+		if err != nil {
+			panic(err)
+		}
+		defer out.Close()
+
+		_, err = io.Copy(out, in)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Fprintln(os.Stderr, "🔄️ Switched to", profileName)
+	}
 }
 
 func fileExists(path string) bool {
