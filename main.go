@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
-	"runtime"
 )
 
 func main() {
@@ -15,10 +14,6 @@ func main() {
 		fmt.Println("Error:", err)
 		return
 	}
-	osDis := runtime.GOOS
-	fmt.Println("Detected os:", osDis)
-
-	fmt.Println("Current User Home Directory:", userDir.HomeDir)
 
 	args := os.Args[1:]
 	gitConfDir := userDir.HomeDir
