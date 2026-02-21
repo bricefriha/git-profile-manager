@@ -9,52 +9,79 @@ import (
 )
 
 func main() {
-	userDir, err := user.Current()
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
 
 	args := os.Args[1:]
-	gitConfDir := userDir.HomeDir
+	switch args[0] {
 
-	if args[0] == "switchto" {
-		profileName := args[1]
-		fileSource := fmt.Sprintf(".gitconfig-%s", profileName)
-		sourcePath := filepath.Join(gitConfDir, fileSource)
-		targetFilePath := filepath.Join(gitConfDir, ".gitconfig")
+	case "-st":
+		switchTo(args[1])
+	case "--switchto":
+		switchTo(args[1])
 
-		if !fileExists(targetFilePath) {
-			fmt.Fprintln(os.Stderr, "No git config available in this environment")
-			return
-		}
-		if !fileExists(sourcePath) {
-			fmt.Fprintf(os.Stderr, "%s not found", sourcePath)
-			fmt.Println()
-			return
-		}
+	case "--help":
+		showHelper()
+	case "-h":
+		showHelper()
 
-		in, err := os.Open(sourcePath)
-		if err != nil {
-			panic(err)
-		}
+	default:
+		fmt.Fprintln(os.Stderr, "‼️", "command '", args[0], "' not found")
 
-		out, err := os.Create(targetFilePath)
-		if err != nil {
-			panic(err)
-		}
-		defer out.Close()
-
-		_, err = io.Copy(out, in)
-		if err != nil {
-			panic(err)
-		}
-
-		fmt.Fprintln(os.Stderr, "🔄️ Switched to", profileName)
 	}
+
 }
 
 func fileExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
+}
+
+func switchTo(profileName string) {
+	userDir, err := user.Current()
+	gitConfDir := userDir.HomeDir
+
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fileSource := fmt.Sprintf(".gitconfig-%s", profileName)
+	sourcePath := filepath.Join(gitConfDir, fileSource)
+	targetFilePath := filepath.Join(gitConfDir, ".gitconfig")
+
+	if !fileExists(targetFilePath) {
+		fmt.Fprintln(os.Stderr, "No git config available in this environment")
+		return
+	}
+	if !fileExists(sourcePath) {
+		fmt.Fprintf(os.Stderr, "%s not found", sourcePath)
+		fmt.Println()
+		return
+	}
+
+	in, err := os.Open(sourcePath)
+	if err != nil {
+		panic(err)
+	}
+
+	out, err := os.Create(targetFilePath)
+	if err != nil {
+		panic(err)
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, in)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Fprintln(os.Stderr, "🔄️ Switched to", profileName)
+}
+
+func showHelper() {
+	fmt.Println("⌨️ Syntax: gpm [command] [argument]")
+	fmt.Println("switchto, help")
+	fmt.Println()
+	fmt.Println("Commands:")
+	fmt.Println("-st, --switchto [profileName]			switch to another profile")
+	fmt.Println("-h, --help 							show gpm user guidance ")
+
 }
