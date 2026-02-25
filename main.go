@@ -23,6 +23,11 @@ func main() {
 	case "-h":
 		showHelper()
 
+	case "--create":
+		createProfile(args[1])
+	case "-c":
+		createProfile(args[1])
+
 	default:
 		fmt.Fprintln(os.Stderr, "‼️", "command '", args[0], "' not found")
 
@@ -74,6 +79,34 @@ func switchTo(profileName string) {
 	}
 
 	fmt.Fprintln(os.Stderr, "🔄️ Switched to", profileName)
+}
+
+func createProfile(profileName string) {
+	userDir, err := user.Current()
+	gitConfDir := userDir.HomeDir
+
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	destFilePath := filepath.Join(gitConfDir, fmt.Sprintf(".gitconfig-%s", profileName))
+	if fileExists(destFilePath) {
+		fmt.Fprintln(os.Stderr, "❌", profileName, "git profile already exist")
+		return
+	}
+
+	defaultFilePath := filepath.Join(gitConfDir, ".gitconfig")
+
+	in, err := os.ReadFile(defaultFilePath)
+	if err != nil {
+		panic(err)
+	}
+
+	errWf := os.WriteFile(destFilePath, in, 0644)
+	if errWf != nil {
+		panic(errWf)
+	}
+	fmt.Fprintln(os.Stderr, "✅ Just created", profileName, "git profile")
 }
 
 func showHelper() {
