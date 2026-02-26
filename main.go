@@ -107,6 +107,7 @@ func showHelper() {
 	fmt.Println("-c, --create [profileName]			    create a new profile")
 	fmt.Println("-st, --switchto [profileName]			switch to another profile")
 	fmt.Println("-h, --help 							show gpm user guidance ")
+	fmt.Println("-ls, --list 							list all the git profiles")
 
 }
 
