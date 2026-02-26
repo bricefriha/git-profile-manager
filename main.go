@@ -11,27 +11,8 @@ import (
 func main() {
 
 	args := os.Args[1:]
-	switch args[0] {
 
-	case "-st":
-		switchTo(args[1])
-	case "--switchto":
-		switchTo(args[1])
-
-	case "--help":
-		showHelper()
-	case "-h":
-		showHelper()
-
-	case "--create":
-		createProfile(args[1])
-	case "-c":
-		createProfile(args[1])
-
-	default:
-		fmt.Fprintln(os.Stderr, "‼️", "command '", args[0], "' not found")
-
-	}
+	runCommand(args[0], args[1:])
 
 }
 
@@ -118,4 +99,28 @@ func showHelper() {
 	fmt.Println("-st, --switchto [profileName]			switch to another profile")
 	fmt.Println("-h, --help 							show gpm user guidance ")
 
+}
+
+func runCommand(name string, args []string) {
+	switch name {
+
+	case "-st":
+		switchTo(args[0])
+	case "--switchto":
+		switchTo(args[0])
+
+	case "--help":
+		showHelper()
+	case "-h":
+		showHelper()
+
+	case "--create":
+		createProfile(args[0])
+	case "-c":
+		createProfile(args[0])
+
+	default:
+		fmt.Fprintln(os.Stderr, "‼️", "command '", name, "' not found")
+
+	}
 }
