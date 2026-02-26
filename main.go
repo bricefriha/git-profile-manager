@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"strings"
 )
 
 func main() {
@@ -22,11 +23,8 @@ func fileExists(path string) bool {
 }
 
 func switchTo(profileName string) {
-	userDir, err := user.Current()
-	gitConfDir := userDir.HomeDir
-
-	if err != nil {
-		fmt.Println("Error:", err)
+	gitConfDir := getGitConfDir()
+	if strings.TrimSpace(gitConfDir) == "" {
 		return
 	}
 	fileSource := fmt.Sprintf(".gitconfig-%s", profileName)
@@ -60,6 +58,17 @@ func switchTo(profileName string) {
 	}
 
 	fmt.Fprintln(os.Stderr, "🔄️ Switched to", profileName)
+}
+
+func getGitConfDir() string {
+	userDir, err := user.Current()
+	gitConfDir := userDir.HomeDir
+
+	if err != nil {
+		fmt.Println("Error:", err)
+		return ""
+	}
+	return gitConfDir
 }
 
 func createProfile(profileName string) {
@@ -101,6 +110,26 @@ func showHelper() {
 
 }
 
+func listProfiles() {
+	gitConfDir := getGitConfDir()
+	if strings.TrimSpace(gitConfDir) == "" {
+		return
+	}
+
+	entries, err := os.ReadDir(gitConfDir)
+	if err != nil {
+		panic(err)
+	}
+
+	for i := 0; i < len(entries); i++ {
+		entry := entries[i]
+		if strings.HasPrefix(entry.Name(), ".gitconfig-") {
+			fmt.Println(strings.Split(entry.Name(), "-")[1])
+		}
+	}
+
+}
+
 func runCommand(name string, args []string) {
 	switch name {
 
@@ -118,6 +147,11 @@ func runCommand(name string, args []string) {
 		createProfile(args[0])
 	case "-c":
 		createProfile(args[0])
+
+	case "--list":
+		listProfiles()
+	case "-ls":
+		listProfiles()
 
 	default:
 		fmt.Fprintln(os.Stderr, "‼️", "command '", name, "' not found")
